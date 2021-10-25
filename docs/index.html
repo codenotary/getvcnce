@@ -7,7 +7,7 @@
 version_string="v0.10.0-RC-1"
 # base_url=https://github.com/codenotary/cas/releases/latest/download
 base_url=https://github.com/codenotary/cas/releases/download/v0.10.0-RC-1
-echo "Latest available release for CAS is: $version_string"
+echo "Latest available release for cas is: $version_string"
 linux_file="$base_url/cas-$version_string-linux-amd64-static"
 windows_file="$base_url/cas-version_string-windows-amd64.exe"
 mac_file="$base_url/cas-$version_string-darwin-amd64"
@@ -34,6 +34,7 @@ if [[ "$UID" == 0 ]]; then
     mv ./"cas$out" /usr/local/bin/cas
 else
     if which sudo > /dev/null 2>&1; then
+        echo "The cas binary will now be installed, you will be prompted for your password in order to place the binary under /usr/local/bin"
         sudo mv ./"cas$out" /usr/local/bin/cas
     else
         echo "The cas binary has been downloaded, please move the binary to a directory within your PATH variable"
@@ -41,5 +42,5 @@ else
         exit 0
     fi
 fi
-echo "Succesfully installed CAS binary"
+echo "Succesfully installed cas binary"
 echo "🎉 Done." echo "You can run now: $ cas" 
