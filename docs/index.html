@@ -30,4 +30,16 @@ if [[ "$http_code" -ne 200 ]]; then
     exit 2
 fi
 chmod +x ./"cas$out"
-echo "Succesfully acquired CAS binary"
+if [[ "$UID" == 0 ]]; then
+    mv ./"cas$out" /usr/local/bin/cas
+else
+    if which sudo > /dev/null 2>&1; then
+        sudo mv ./"cas$out" /usr/local/bin/cas
+    else
+        echo "The cas binary has been downloaded, please move the binary to a directory within your PATH variable"
+        echo "Alternatively, you can use './cas' to run it from within the current working directory"
+        exit 0
+    fi
+fi
+echo "Succesfully installed CAS binary"
+echo "🎉 Done." echo "You can run now: $ cas" 
