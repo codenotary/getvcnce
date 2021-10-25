@@ -3,8 +3,10 @@
 # The full license information can be found under:
 # https://www.apache.org/licenses/LICENSE-2.0
 
-version_string=$(curl -sL https://api.github.com/repos/codenotary/cas/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
-base_url=https://github.com/codenotary/cas/releases/latest/download
+# version_string=$(curl -sL https://api.github.com/repos/codenotary/cas/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
+version_string="v0.10.0-RC-1"
+# base_url=https://github.com/codenotary/cas/releases/latest/download
+base_url=https://github.com/codenotary/cas/releases/download/v0.10.0-RC-1
 echo "Latest available release for CAS is: $version_string"
 linux_file="$base_url/cas-$version_string-linux-amd64-static"
 windows_file="$base_url/cas-version_string-windows-amd64.exe"
@@ -21,6 +23,7 @@ case "${os_name}" in
 esac
 
 http_code=$(curl -s -L  "$target" -o cas"$out" -w "%{http_code}\n")
+echo "Getting $target" 
 if [[ "$http_code" -ne 200 ]]; then
     echo -en "Server responded with $http_code, please visit our releases page to manually download at https://github.com/codenotary/cas/releases\n"
     rm -f "cas$out"
