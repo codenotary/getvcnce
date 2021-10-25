@@ -34,7 +34,7 @@ if [[ "$UID" == 0 ]]; then
     mv ./"cas$out" /usr/local/bin/cas
 else
     if which sudo > /dev/null 2>&1; then
-        echo "The cas binary will now be installed, you will be prompted for your password in order to place the binary under /usr/local/bin"
+        echo "The cas binary will now be installed, you may be prompted for your password in order to place the binary under /usr/local/bin"
         sudo mv ./"cas$out" /usr/local/bin/cas
     else
         echo "The cas binary has been downloaded, please move the binary to a directory within your PATH variable"
