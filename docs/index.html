@@ -3,8 +3,8 @@
 # The full license information can be found under:
 # https://www.apache.org/licenses/LICENSE-2.0
 
-version_string=$(curl -sL https://api.github.com/repos/codenotary/vcn/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
-base_url=https://github.com/codenotary/vcn/releases/latest/download
+version_string=$(curl -sL https://api.github.com/repos/codenotary/cas/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
+base_url=https://github.com/codenotary/cas/releases/latest/download
 echo "Latest available release for CAS is: $version_string"
 linux_file="$base_url/cas-$version_string-linux-amd64-static"
 windows_file="$base_url/cas-version_string-windows-amd64.exe"
