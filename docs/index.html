@@ -29,4 +29,5 @@ if [[ "$http_code" -ne 200 ]]; then
     rm -f "cas$out"
     exit 2
 fi
+chmod +x ./"cas$out"
 echo "Succesfully acquired CAS binary"
