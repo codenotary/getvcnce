@@ -4,9 +4,9 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 # version_string=$(curl -sL https://api.github.com/repos/codenotary/cas/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
-version_string="v0.10.0-RC-1"
+version_string="v0.10.0-RC-2"
 # base_url=https://github.com/codenotary/cas/releases/latest/download
-base_url=https://github.com/codenotary/cas/releases/download/v0.10.0-RC-1
+base_url=https://github.com/codenotary/cas/releases/download/v0.10.0-RC-2
 echo "Latest available release for cas is: $version_string"
 linux_file="$base_url/cas-$version_string-linux-amd64-static"
 windows_file="$base_url/cas-version_string-windows-amd64.exe"
