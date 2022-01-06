@@ -12,6 +12,8 @@ if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "x86_64" ]; then
     target="darwin-amd64"
 elif [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ]; then
     target="linux-amd64-static"
+elif [ "$(uname -s)" = "FreeBSD" ] && [ "$(uname -m)" = "amd64" ]; then
+    target="linux-amd64-static"
 elif [ "$(uname -s)" = "Linux" ] && ( uname -m | grep -q -e '^arm' -e '^aarch' ); then
     target="linux-arm64"
 else
