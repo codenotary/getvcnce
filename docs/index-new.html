@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# Copyright (c) 2018-2022 Codenotary, Inc. All Rights Reserved.
+# This software is released under Apache License 2.0.
+# The full license information can be found under:
+# https://www.apache.org/licenses/LICENSE-2.0
+
+
+set -e
+
+if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "x86_64" ]; then
+    target="darwin-amd64"
+elif [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ]; then
+    target="linux-amd64-static"
+elif [ "$(uname -s)" = "Linux" ] && ( uname -m | grep -q -e '^arm' -e '^aarch' ); then
+    target="linux-arm64"
+else
+    echo "Unsupported OS or architecture"
+    exit 1
+fi
+
+fetch()
+{
+    if which curl > /dev/null; then
+        if [ "$#" -eq 2 ]; then curl -L -o "$1" "$2"; else curl -sSL "$1"; fi
+    elif which wget > /dev/null; then
+        if [ "$#" -eq 2 ]; then wget -O "$1" "$2"; else wget -nv -O - "$1"; fi
+    else
+        echo "Can't find curl or wget, can't download package"
+        exit 1
+    fi
+}
+
+echo "Detected target: $target"
+
+url=$(
+    fetch https://api.github.com/repos/codenotary/cas/releases/latest |
+    tac | tac | grep -wo -m1 "https://.*$target" || true
+)
+if ! test "$url"; then
+    echo "Could not find release info"
+    exit 1
+fi
+
+echo "Downloading cas..."
+
+temp_dir=$(mktemp -dt cas.XXXXXX)
+trap 'rm -rf "$temp_dir"' EXIT INT TERM
+cd "$temp_dir"
+
+if ! fetch cas "$url"; then
+    echo "Could not download cas binary"
+    exit 1
+fi
+
+user_bin="$HOME/.local/bin"
+case $PATH in
+    *:"$user_bin":* | "$user_bin":* | *:"$user_bin")
+        default_bin=$user_bin
+        ;;
+    *)
+        default_bin='/usr/local/bin'
+        ;;
+esac
+
+printf "Install location [default: %s]: " "$default_bin"
+read -r bindir < /dev/tty
+bindir=${bindir:-$default_bin}
+
+while ! test -d "$bindir"; do
+    echo "Directory $bindir does not exist"
+    printf "Install location [default: %s]: " "$default_bin"
+    read -r bindir < /dev/tty
+    bindir=${bindir:-$default_bin}
+done
+
+if test -w "$bindir"; then
+    chmod +x cas
+    mv cas "$bindir/"
+else
+    chmod +x cas
+    echo "Using SUDO to install $bindir/cas"
+    sudo mv cas "$bindir/"
+fi
+
+echo "$("$bindir"/cas --version | head -1) has been installed to:"
+echo " • $bindir/cas"
+echo -en "🎉Done \nYou can now run: $ cas\n"
+
