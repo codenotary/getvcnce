@@ -32,6 +32,8 @@ fetch()
 }
 
 echo "Detected target: $target"
+version_string=$(curl -sL https://api.github.com/repos/codenotary/cas/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
+echo "Latest available release for cas is: $version_string"
 
 url=$(
     fetch https://api.github.com/repos/codenotary/cas/releases/latest |
@@ -85,5 +87,10 @@ fi
 
 echo "$("$bindir"/cas --version | head -1) has been installed to:"
 echo " • $bindir/cas"
-echo -en "🎉Done \nYou can now run: $ cas\n"
+echo ""
+echo -en "🎉Done \n\nYou can now use the community attestation service (https://cas.codenotary.com) by running: $ cas\n\n"
+echo -en "To get started set your API key you received by email and login: $ export CAS_API_KEY=<your API_KEY>; cas login\n\n"
+echo -en "You can find the online documentation here: https://github.com/codenotary/cas\n\n"
+
+
 
