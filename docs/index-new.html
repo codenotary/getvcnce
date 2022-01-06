@@ -8,54 +8,33 @@
 
 set -e
 
-if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "x86_64" ]; then
-    target="darwin-amd64"
-elif [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "x86_64" ]; then
-    target="linux-amd64-static"
-elif [ "$(uname -s)" = "FreeBSD" ] && [ "$(uname -m)" = "amd64" ]; then
-    target="linux-amd64-static"
-elif [ "$(uname -s)" = "Linux" ] && ( uname -m | grep -q -e '^arm' -e '^aarch' ); then
-    target="linux-arm64"
-else
-    echo "Unsupported OS or architecture"
-    exit 1
-fi
-
-fetch()
-{
-    if which curl > /dev/null; then
-        if [ "$#" -eq 2 ]; then curl -L -o "$1" "$2"; else curl -sSL "$1"; fi
-    elif which wget > /dev/null; then
-        if [ "$#" -eq 2 ]; then wget -O "$1" "$2"; else wget -nv -O - "$1"; fi
-    else
-        echo "Can't find curl or wget, can't download package"
-        exit 1
-    fi
-}
-
-echo "Detected target: $target"
 version_string=$(curl -sL https://api.github.com/repos/codenotary/cas/releases/latest | awk '/tag_name/ {gsub(/"/,""); gsub(/,/,""); print $2}')
+base_url=https://github.com/codenotary/cas/releases/latest/download
 echo "Latest available release for cas is: $version_string"
+linux_file="$base_url/cas-$version_string-linux-amd64-static"
+windows_file="$base_url/cas-version_string-windows-amd64.exe"
+mac_file="$base_url/cas-$version_string-darwin-amd64"
+os_name=$(uname -s)
 
-url=$(
-    fetch https://api.github.com/repos/codenotary/cas/releases/latest |
-    tac | tac | grep -wo -m1 "https://.*$target" || true
-)
-if ! test "$url"; then
-    echo "Could not find release info"
-    exit 1
-fi
+case "${os_name}" in
+    Linux*)     target=$linux_file;;
+    Darwin*)    target=$mac_file;;
+    FreeBSD*)    target=$linux_file;;
+    CYGWIN*)    target="$windows_file" && out=".exe";;
+    MINGW*)     target="$windows_file" && out=".exe";;
+    *)          echo "Unsupported runner OS, aborting CAS Download" && exit 1;;
+esac
 
+http_code=$(curl -s -L  "$target" -o cas -w "%{http_code}\n")
 echo "Downloading cas..."
 
-temp_dir=$(mktemp -dt cas.XXXXXX)
-trap 'rm -rf "$temp_dir"' EXIT INT TERM
-cd "$temp_dir"
-
-if ! fetch cas "$url"; then
-    echo "Could not download cas binary"
-    exit 1
+if [[ "$http_code" -ne 200 ]]; then
+    echo -en "Server responded with $http_code, please visit our releases page to manually download at https://github.com/codenotary/cas/releases\n"
+    rm -f cas
+    exit 2
 fi
+chmod +x ./cas
+
 
 user_bin="$HOME/.local/bin"
 case $PATH in
@@ -79,10 +58,8 @@ while ! test -d "$bindir"; do
 done
 
 if test -w "$bindir"; then
-    chmod +x cas
     mv cas "$bindir/"
 else
-    chmod +x cas
     echo "Using SUDO to install $bindir/cas"
     sudo mv cas "$bindir/"
 fi
